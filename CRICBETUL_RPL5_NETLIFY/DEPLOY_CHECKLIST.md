@@ -1,0 +1,22 @@
+# RPL Season 5 — Production Launch Checklist
+
+- [ ] ZIP extracted; project files uploaded to a GitHub repository root.
+- [ ] Netlify project imported from GitHub (not static drag-and-drop).
+- [ ] Account supports Netlify Database / credit-based database feature.
+- [ ] First deploy completed and migration `0001_create_rpl_state.sql` applied.
+- [ ] `RPL_ADMIN_TOKEN` set in Netlify Functions environment scope (32+ random characters).
+- [ ] Redeploy completed after setting environment variable.
+- [ ] `/setup-check.html` reports database connected and admin configured.
+- [ ] Organizer login works with the configured token.
+- [ ] Test player registration on one phone; verify it appears in Admin from another device.
+- [ ] Test team registration and approval.
+- [ ] Test photo/logo uploads.
+- [ ] Test UTR submission and pending status; verify only Admin can access payer/UTR details.
+- [ ] Confirm bank beneficiary and UPI ID with the organizer/account holder before payment collection.
+- [ ] Configure confirmed player fee, team fee, purse, base price, increment and squad limit.
+- [ ] Run a test auction using non-real/test entries.
+- [ ] Test LED display on the venue display computer.
+- [ ] Test OBS Browser Source at 1920×1080.
+- [ ] Download an Admin JSON backup and CSV exports.
+- [ ] Remove any test registrations/payments before public opening.
+- [ ] Keep the Admin token private and rotate it if shared.
