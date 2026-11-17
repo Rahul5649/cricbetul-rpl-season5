@@ -79,7 +79,7 @@ jobs:
 
           ## Netlify build settings for this standalone package
 
-          - Base directory: `. ` (the repository root; use `.`)
+          - Base directory: `.` (the repository root)
           - Build command: `npm run build`
           - Publish directory: `public`
           - Functions directory: `netlify/functions`
