@@ -65,6 +65,7 @@ jobs:
             [headers.values]
               X-Content-Type-Options = "nosniff"
           EOF
+          rm -rf deploy-package/node_modules deploy-package/.netlify
           cp DEPLOY_READY_HI.md deploy-package/DEPLOY_READY_HI.md
           cp CRICBETUL_RPL5_NETLIFY/AUDIT_REPORT_2026-11-17.md deploy-package/AUDIT_REPORT_2026-11-17.md 2>/dev/null || true
           cd deploy-package
