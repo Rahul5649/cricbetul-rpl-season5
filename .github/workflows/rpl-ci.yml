@@ -1,0 +1,79 @@
+name: RPL Season 5 CI and Deploy Package
+
+on:
+  push:
+    branches: [main, ready-to-deploy]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.13.0"
+      - name: Install dependencies
+        working-directory: CRICBETUL_RPL5_NETLIFY
+        run: npm install --no-audit --no-fund
+      - name: Run project smoke tests
+        working-directory: CRICBETUL_RPL5_NETLIFY
+        run: npm test
+      - name: Assemble standalone Netlify package
+        shell: bash
+        run: |
+          rm -rf deploy-package
+          mkdir -p deploy-package
+          cp -a CRICBETUL_RPL5_NETLIFY/. deploy-package/
+          cat > deploy-package/netlify.toml <<'EOF'
+          [build]
+            base = "."
+            command = "npm run build"
+            publish = "public"
+            functions = "netlify/functions"
+
+          [functions]
+            node_bundler = "esbuild"
+
+          [build.environment]
+            NODE_VERSION = "22.13.0"
+
+          [[headers]]
+            for = "/*.html"
+            [headers.values]
+              X-Content-Type-Options = "nosniff"
+              Referrer-Policy = "strict-origin-when-cross-origin"
+
+          [[headers]]
+            for = "/display.html"
+            [headers.values]
+              Cache-Control = "no-store, no-cache, must-revalidate"
+
+          [[headers]]
+            for = "/overlay.html"
+            [headers.values]
+              Cache-Control = "no-store, no-cache, must-revalidate"
+
+          [[headers]]
+            for = "/assets/*"
+            [headers.values]
+              X-Content-Type-Options = "nosniff"
+          EOF
+          rm -rf deploy-package/node_modules deploy-package/.netlify
+          cp DEPLOY_READY_HI.md deploy-package/DEPLOY_READY_HI.md
+          cp CRICBETUL_RPL5_NETLIFY/AUDIT_REPORT_2026-11-17.md deploy-package/AUDIT_REPORT_2026-11-17.md 2>/dev/null || true
+          cd deploy-package
+          zip -qr ../cricbetul-rpl5-netlify-ready.zip .
+      - name: Upload standalone deploy ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: cricbetul-rpl5-netlify-ready
+          path: cricbetul-rpl5-netlify-ready.zip
+          if-no-files-found: error
+          retention-days: 30
