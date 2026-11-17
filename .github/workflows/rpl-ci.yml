@@ -66,7 +66,106 @@ jobs:
               X-Content-Type-Options = "nosniff"
           EOF
           rm -rf deploy-package/node_modules deploy-package/.netlify
-          cp DEPLOY_READY_HI.md deploy-package/DEPLOY_READY_HI.md
+          cat > deploy-package/README.md <<'EOF'
+          # CRICBETUL RPL Season 5 — Standalone Netlify Package
+
+          This ZIP is a standalone copy of the RPL Season 5 tournament website. After extraction, the files in this folder are the project root.
+
+          ## Two deployment paths
+
+          **Option A — use the original repository (recommended):** Import `Rahul5649/cricbetul-rpl-season5` into Netlify. The repository's root `netlify.toml` sets Base directory to `CRICBETUL_RPL5_NETLIFY` automatically. Use the `main` branch after the deployment configuration PR is merged.
+
+          **Option B — use this standalone ZIP:** Extract all ZIP contents, upload these files to the root of a new GitHub repository, then import that repository into Netlify. Its `netlify.toml` uses Base directory `.`. Do not use Netlify's static drag-and-drop deploy; this app requires Netlify Functions and Database migrations.
+
+          ## Netlify build settings for this standalone package
+
+          - Base directory: `. ` (the repository root; use `.`)
+          - Build command: `npm run build`
+          - Publish directory: `public`
+          - Functions directory: `netlify/functions`
+          - Node.js: `22.13.0`
+
+          ## Required organizer secret
+
+          In Netlify Project Configuration → Environment Variables, add `RPL_ADMIN_TOKEN` with a unique random value of at least 32 characters and Functions runtime scope. Generate it on Mac with `openssl rand -hex 32`. Never commit or share it. Redeploy after setting it.
+
+          ## Database and media
+
+          This package uses Netlify Database (PostgreSQL) and Netlify Blobs. Netlify provisions the database and runs migrations during deployment. Confirm Database is available in your plan and review its credit usage before accepting public registrations.
+
+          Migration: `netlify/database/migrations/0001_create_rpl_state.sql`
+
+          ## Verify before launch
+
+          Visit `/setup-check.html` and verify Database = Connected and Organizer = Configured. Test player/team registration, approvals, photo upload, UTR submission, auction bids/timer/sold/unsold, LED display and OBS overlay from at least two devices. Export a backup and remove test records.
+
+          Routes: `/`, `/admin.html`, `/auction.html`, `/display.html`, `/overlay.html`, `/setup-check.html`.
+
+          ## Scope and safety
+
+          This is the RPL Season 5 cricket tournament website, not the separate CRICBETUL Messaging Pro product. The existing code uses one shared organizer token, has no multi-user role system, no payment gateway or automatic bank reconciliation, no complete audit log, and needs anti-abuse/rate-limit protection. Whole-state admin saves can conflict under concurrent editing. It has passed the repository smoke test, not a live Netlify production test.
+
+          The supplied UPI QR beneficiary differs from the tournament organizer. Obtain authorization from the account holder and verify the beneficiary in the UPI app before collecting money. Payment confirmation is manual.
+          EOF
+          cat > deploy-package/DEPLOY_CHECKLIST.md <<'EOF'
+          # RPL Season 5 — standalone deployment checklist
+
+          - [ ] ZIP extracted; all files including netlify.toml and package.json are at project root.
+          - [ ] Project connected to Netlify through GitHub (not static drag-and-drop).
+          - [ ] Base directory = . ; build = npm run build ; publish = public ; functions = netlify/functions.
+          - [ ] Node runtime 22.13.0.
+          - [ ] Netlify Database is available and migration 0001 is applied.
+          - [ ] RPL_ADMIN_TOKEN added as a Functions runtime environment variable (32+ random characters).
+          - [ ] New deploy completed after secret configuration.
+          - [ ] /setup-check.html reports database connected and organizer configured.
+          - [ ] Player and team registration tested from a phone; records visible in admin from another device.
+          - [ ] Photo and logo upload tested.
+          - [ ] Payment UTR remains pending until checked against receiving bank/UPI account.
+          - [ ] Team/player approval and auction (nomination, bid, timer, sold/unsold, purse, squad limit) tested.
+          - [ ] LED display and OBS overlay tested on broadcast computer.
+          - [ ] Admin backup and CSV exports downloaded.
+          - [ ] UPI beneficiary authorization confirmed in writing before collecting money.
+          - [ ] Test records removed before public opening.
+          EOF
+          cat > deploy-package/DEPLOY_READY_HI.md <<'EOF'
+          # CRICBETUL RPL Season 5 — Netlify Deployment Guide
+
+          यह ZIP standalone package है। ZIP extract करने के बाद इसकी सभी files ही project root हैं।
+
+          ## Netlify पर लगाने का तरीका
+
+          **विकल्प 1 (अनुशंसित):** Netlify में GitHub से `Rahul5649/cricbetul-rpl-season5` repository import करें। Merge किए गए root `netlify.toml` में Base directory `CRICBETUL_RPL5_NETLIFY` सेट है। `main` branch चुनें।
+
+          **विकल्प 2:** इस ZIP को extract करके इसकी सभी files किसी नए GitHub repository के root में upload करें। उस repository को Netlify से connect करें। इस standalone ZIP का `netlify.toml` Base directory `.` उपयोग करता है।
+
+          Static drag-and-drop deploy न करें; इसमें Netlify Functions और Database migration हैं।
+
+          ## Build Settings
+
+          - Base directory: `.` (standalone ZIP के लिए)
+          - Build command: `npm run build`
+          - Publish directory: `public`
+          - Functions directory: `netlify/functions`
+          - Node.js: `22.13.0`
+
+          ## Admin Secret
+
+          Netlify → Project Configuration → Environment Variables में `RPL_ADMIN_TOKEN` नाम का secret बनाएँ। Mac Terminal पर `openssl rand -hex 32` चलाकर random value बनाएँ। इसे Functions runtime scope दें। Secret को GitHub या public page पर कभी न डालें। फिर नया deploy करें।
+
+          ## Database
+
+          Netlify Database (PostgreSQL) और Netlify Blobs इस package के backend हैं। Account में Database सुविधा और credits उपलब्ध होने चाहिए। Migration: `netlify/database/migrations/0001_create_rpl_state.sql`।
+
+          ## Deploy के बाद जाँचें
+
+          `/setup-check.html` खोलें। Database Connected और Organizer Configured आना चाहिए। फिर player registration, team registration, photo upload, UTR submit/verify, auction, LED और OBS को दूसरे device से टेस्ट करें। Backup/CSV export करें। Demo records हटाने के बाद ही public registration चालू करें।
+
+          ## जरूरी सीमाएँ
+
+          यह RPL Season 5 tournament system है, CRICBETUL Messaging Pro नहीं। अभी single shared organizer token है; Super Admin/Admin/Reseller की अलग identity नहीं। Payment gateway/automatic bank verification और पूर्ण audit log नहीं है। Public registration/image upload के लिए anti-spam rate limiting आगे जोड़नी होगी; एक साथ कई admin edits से conflict हो सकता है। GitHub smoke test पास हुआ है, लेकिन live Netlify deployment test अभी बाकी है।
+
+          QR beneficiary और tournament organizer का नाम अलग है। Account-holder की अनुमति और UPI app में beneficiary पुष्टि के बिना public payment collect न करें। Payment verification manual है।
+          EOF
           cp CRICBETUL_RPL5_NETLIFY/AUDIT_REPORT_2026-11-17.md deploy-package/AUDIT_REPORT_2026-11-17.md 2>/dev/null || true
           cd deploy-package
           zip -qr ../cricbetul-rpl5-netlify-ready.zip .
